@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>DoodleRush - Real-Time Multiplayer Draw & Guess Game</title>
+  <meta name="description" content="Play DoodleRush with friends! A real-time multiplayer draw and guess game that works seamlessly across phone, tablet, and desktop without installs or logins.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Top App Navigation Bar -->
+  <header class="app-header">
+    <div class="logo-group">
+      <span class="logo-icon">🎨</span>
+      <span class="logo-title">DoodleRush</span>
+      <span class="logo-badge">Live Multiplayer</span>
+    </div>
+    <div class="header-actions">
+      <button id="btn-mute" class="icon-btn" title="Toggle Sound">
+        <!-- SVG injected by JS -->
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Viewport containing dynamic screens -->
+  <main class="main-viewport">
+
+    <!-- SCREEN 1: Auth / Profile & Join / Create Room -->
+    <section id="screen-auth" class="screen active">
+      <div class="glass-card">
+        <div class="hero-tagline">
+          <h1>Draw & Guess Together</h1>
+          <p>Join with any phone or laptop using a simple room code. No install or login required!</p>
+        </div>
+
+        <div class="form-section">
+          <label class="form-label" for="nickname-input">Choose Your Nickname</label>
+          <input type="text" id="nickname-input" class="styled-input" placeholder="e.g. MasterArtist" maxlength="16" autofocus>
+        </div>
+
+        <div class="form-section">
+          <label class="form-label">Pick Your Avatar</label>
+          <div id="avatar-grid" class="avatar-grid">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+
+        <div class="action-cards">
+          <!-- Create Room Section -->
+          <div class="action-box">
+            <div class="action-title">✨ Create a New Room</div>
+            <div class="settings-row">
+              <div class="setting-col">
+                <label class="form-label" for="rounds-select">Rounds</label>
+                <select id="rounds-select">
+                  <option value="2">2 Rounds</option>
+                  <option value="3" selected>3 Rounds</option>
+                  <option value="5">5 Rounds</option>
+                </select>
+              </div>
+              <div class="setting-col">
+                <label class="form-label" for="draw-time-select">Draw Time</label>
+                <select id="draw-time-select">
+                  <option value="45">45 Sec</option>
+                  <option value="60" selected>60 Sec</option>
+                  <option value="80">80 Sec</option>
+                </select>
+              </div>
+            </div>
+            <button id="btn-create-room" class="btn-primary" type="button">
+              Create Room
+            </button>
+          </div>
+
+          <!-- Join Existing Room -->
+          <div class="action-box">
+            <div class="action-title">🚀 Have a Room Code?</div>
+            <div class="join-row">
+              <input type="text" id="room-code-input" class="styled-input room-input" placeholder="CODE" maxlength="4">
+              <button id="btn-join-room" class="btn-secondary" type="button">
+                Join
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 2: Lobby / Waiting Room -->
+    <section id="screen-lobby" class="screen">
+      <div class="glass-card">
+        <div class="lobby-header">
+          <div class="room-code-tag">
+            <span>Room Code:</span>
+            <b id="lobby-room-code">----</b>
+          </div>
+          <div class="lobby-share-actions">
+            <button id="btn-copy-link" class="btn-secondary" type="button">
+              🔗 Copy Invite Link
+            </button>
+            <button id="btn-show-qr" class="btn-secondary" type="button">
+              📱 Show QR Code
+            </button>
+          </div>
+        </div>
+
+        <div class="players-roster-title">Players in Room</div>
+        <div id="lobby-players-list" class="players-roster">
+          <!-- Injected by JS -->
+        </div>
+
+        <button id="btn-start-game" class="btn-primary" type="button" style="display: none;">
+          🎮 Start Game Now
+        </button>
+        <p id="lobby-waiting-msg" class="waiting-hint" style="display: none;">
+          Waiting for the host to start the game...
+        </p>
+      </div>
+    </section>
+
+    <!-- SCREEN 3: Live Game Arena -->
+    <section id="screen-game" class="screen">
+
+      <!-- Top HUD Bar -->
+      <div class="game-top-bar">
+        <div class="game-stat-pill" id="round-display">Round 1 of 3</div>
+        <div class="word-bar" id="word-display">
+          <!-- Word blanks or secret word -->
+        </div>
+        <div class="timer-box" id="timer-box">
+          ⏱️ <span id="timer-display">60</span>s
+        </div>
+      </div>
+
+      <!-- Close Guess Alert Toast -->
+      <div id="close-notification" class="close-toast">
+        🔥 You're so close!
+      </div>
+
+      <!-- 3-Column Arena Layout -->
+      <div class="game-grid">
+
+        <!-- Column 1: Live Leaderboard -->
+        <aside class="leaderboard-panel">
+          <div class="panel-header">🏆 Standings</div>
+          <div id="game-players-list" class="game-players-list">
+            <!-- Injected by JS -->
+          </div>
+        </aside>
+
+        <!-- Column 2: Synchronized Canvas & Toolbar -->
+        <div class="canvas-panel">
+          <div class="canvas-wrapper">
+            <canvas id="drawing-canvas"></canvas>
+          </div>
+
+          <!-- Drawer Toolbar (Only visible to active drawer) -->
+          <div id="drawer-controls" class="drawer-controls" style="display: none;">
+            <div class="tool-group">
+              <button type="button" class="tool-btn active" data-tool="brush" title="Pencil / Brush (B)">✏️ Brush</button>
+              <button type="button" class="tool-btn" data-tool="fill" title="Bucket Fill (F)">🪣 Fill</button>
+              <button type="button" class="tool-btn" data-tool="eraser" title="Eraser (E)">🧹 Eraser</button>
+            </div>
+
+            <div class="palette-container" id="palette-container">
+              <!-- Swatches injected by JS -->
+              <input type="color" id="custom-color-picker" class="color-picker-input" value="#111827" title="Custom color">
+            </div>
+
+            <div class="tool-group">
+              <button type="button" class="size-btn active" data-size="4" title="Fine"><div class="size-dot" style="width: 4px; height: 4px;"></div></button>
+              <button type="button" class="size-btn" data-size="8" title="Medium"><div class="size-dot" style="width: 7px; height: 7px;"></div></button>
+              <button type="button" class="size-btn" data-size="16" title="Bold"><div class="size-dot" style="width: 12px; height: 12px;"></div></button>
+              <button type="button" class="size-btn" data-size="28" title="Marker"><div class="size-dot" style="width: 18px; height: 18px;"></div></button>
+            </div>
+
+            <div class="tool-group">
+              <button type="button" class="tool-btn" id="btn-undo" title="Undo (Ctrl+Z)">↩️</button>
+              <button type="button" class="tool-btn" id="btn-clear" title="Clear Canvas (C)">🗑️</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 3: Live Guess & Chat Feed -->
+        <aside class="chat-panel">
+          <div class="panel-header">💬 Live Guesses</div>
+          <div id="chat-messages" class="chat-messages">
+            <!-- Messages injected by JS -->
+          </div>
+          <form id="chat-form" class="chat-input-bar">
+            <input type="text" id="chat-input" class="chat-input" placeholder="Type your guess here..." autocomplete="off">
+            <button type="submit" class="btn-send">Guess</button>
+          </form>
+        </aside>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: Word Selection (Shown to drawer) -->
+  <div id="modal-word-choice" class="modal-overlay">
+    <div class="modal-box">
+      <h2 class="modal-title">🎨 Choose Your Word</h2>
+      <p class="modal-subtitle">Pick a word to draw before time expires:</p>
+      <div id="word-choices-container" class="word-choices-grid">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Turn Intermission / Word Reveal -->
+  <div id="modal-turn-end" class="modal-overlay">
+    <div class="modal-box">
+      <h2 class="modal-title">Round Finished!</h2>
+      <p class="modal-subtitle">The secret word was:</p>
+      <div id="turn-end-word" style="font-size: 2rem; font-weight: 900; color: var(--accent-emerald); margin-bottom: 20px;"></div>
+      <p class="waiting-hint">Next round starting in a few seconds...</p>
+    </div>
+  </div>
+
+  <!-- MODAL: Game Over & Podium -->
+  <div id="modal-game-over" class="modal-overlay">
+    <div class="modal-box">
+      <h2 class="modal-title">🎉 Game Over!</h2>
+      <p class="modal-subtitle">Final Leaderboard Standings</p>
+      <div id="podium-container" class="podium-container">
+        <!-- Injected by JS -->
+      </div>
+      <button id="btn-play-again" class="btn-primary" type="button">
+        🔄 Play Again
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: QR Code for Instant Phone Join -->
+  <div id="modal-qr" class="modal-overlay">
+    <div class="modal-box">
+      <h2 class="modal-title">📱 Scan to Join Game</h2>
+      <p class="modal-subtitle">Open your phone camera to scan and join instantly:</p>
+      <div id="qr-container" style="display: flex; justify-content: center; margin: 20px 0;"></div>
+      <button id="btn-close-qr" class="btn-secondary" type="button">Close</button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/canvas.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
