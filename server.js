@@ -14,7 +14,20 @@ const io = new Server(server, {
 
 const PORT = process.env.PORT || 3000;
 
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Netlify function emulator for local development
+const netlifyGameHandler = require('./netlify/functions/game').handler;
+app.all('/.netlify/functions/game', async (req, res) => {
+  const event = {
+    httpMethod: req.method,
+    headers: req.headers,
+    body: JSON.stringify(req.body)
+  };
+  const result = await netlifyGameHandler(event);
+  res.status(result.statusCode).set(result.headers).send(result.body);
+});
 
 // Store active rooms
 const rooms = new Map();
